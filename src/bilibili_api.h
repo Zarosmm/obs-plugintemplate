@@ -6,6 +6,15 @@
 
 struct bilibili_api;
 
+// Structure for libcurl write callback
+struct write_data {
+    char* buffer;
+    size_t size;
+};
+
+// libcurl write callback function
+size_t write_callback(char* ptr, size_t size, size_t nmemb, void* userdata);
+
 struct bilibili_api* bilibili_api_create(void);
 void bilibili_api_destroy(struct bilibili_api* api);
 cJSON* bilibili_api_get_qrcode_data(struct bilibili_api* api);

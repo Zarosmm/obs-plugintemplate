@@ -24,12 +24,9 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 #include <string.h>
 #include <stdlib.h>
 
-// stb_image 头文件（需下载到 external/stb/stb_image.h）
+// stb_image 头文件
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-
-#define PLUGIN_NAME "MyBilibiliPlugin"
-#define PLUGIN_VERSION "1.0.0"
 
 // 自定义源数据结构
 struct bilibili_source {
@@ -49,22 +46,26 @@ struct qr_check_data {
 // 加载图片为 OBS 纹理
 static gs_texture_t* load_image_texture(const char* url) {
     CURL* curl = curl_easy_init();
-    struct write_data data = {0};
-    if (curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, url);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
-        CURLcode res = curl_easy_perform(curl);
-        curl_easy_cleanup(curl);
-        if (res != CURLE_OK) {
-            obs_log(LOG_ERROR, "下载二维码图片失败: %s", curl_easy_strerror(res));
-            if (data.buffer) bfree(data.buffer);
-            return NULL;
-        }
+    struct write_data data = { .buffer = NULL, .size = 0 };
+    if (!curl) {
+        obs_log(LOG_ERROR, "Failed to initialize curl");
+        return NULL;
     }
 
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
+    CURLcode res = curl_easy_perform(curl);
+    if (res != CURLE_OK) {
+        obs_log(LOG_ERROR, "下载二维码图片失败: %s", curl_easy_strerror(res));
+        if (data.buffer) bfree(data.buffer);
+        curl_easy_cleanup(curl);
+        return NULL;
+    }
+    curl_easy_cleanup(curl);
+
     int width, height, channels;
-    unsigned char* image_data = stbi_load_from_memory((unsigned char*)data.buffer, data.size, &width, &height, &channels, 4);
+    unsigned char* image_data = stbi_load_from_memory((unsigned char*)data.buffer, (int)data.size, &width, &height, &channels, 4);
     if (data.buffer) bfree(data.buffer);
     if (!image_data) {
         obs_log(LOG_ERROR, "无法加载二维码图片");
@@ -188,8 +189,8 @@ bool obs_module_load(void) {
     obs_register_source(&bilibili_source_info);
 
     // 添加菜单项到 OBS 工具菜单
-    obs_frontend_add_menu_item(obs_module_text("StartLive"), start_live_callback);
-    obs_frontend_add_menu_item(obs_module_text("StopLive"), stop_live_callback);
+    obs_frontend_add_tools_menu_item(obs_module_text("StartLive"), start_live_callback, NULL);
+    obs_frontend_add_tools_menu_item(obs_module_text("StopLive"), stop_live_callback, NULL);
 
     obs_log(LOG_INFO, "插件加载成功 (版本 %s)", PLUGIN_VERSION);
     return true;
