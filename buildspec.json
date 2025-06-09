@@ -33,13 +33,13 @@
     },
     "platformConfig": {
         "macos": {
-            "bundleId": "com.example.plugintemplate-for-obs"
+            "bundleId": "com.example.bilibili-live-for-obs"
         }
     },
-    "name": "plugintemplate-for-obs",
-    "displayName": "Plugin Template for OBS",
+    "name": "BiliBili-live",
+    "displayName": "BiliBili-live Plugin For OBS",
     "version": "1.0.0",
-    "author": "Your Name Here",
+    "author": "Zaros",
     "website": "https://example.com",
-    "email": "me@example.com"
+    "email": "kuzidiaolewc@outlook.com"
 }

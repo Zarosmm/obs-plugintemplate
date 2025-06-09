@@ -33,7 +33,14 @@ if(ENABLE_QT)
     PROPERTIES AUTOMOC ON AUTOUIC ON AUTORCC ON
   )
 endif()
+include_directories(${CMAKE_SOURCE_DIR}/external/cJSON)
+include_directories(${CMAKE_SOURCE_DIR}/external/stb)
 
-target_sources(${CMAKE_PROJECT_NAME} PRIVATE src/plugin-main.c)
+# 添加源文件
+target_sources(${CMAKE_PROJECT_NAME} PRIVATE
+    src/plugin-main.c
+    src/bilibili_api.c
+    external/cJSON/cJSON.c
+)
 
 set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME ${_name})
